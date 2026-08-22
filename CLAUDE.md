@@ -2,6 +2,13 @@
 
 Guidance for Claude Code when working in this repository. Keep this file short and authoritative: rules here should be hard to infer from code or easy to get wrong.
 
+## Instruction Sources
+
+- Echo's internal Git, branch, worktree, commit, and GitLab Merge Request workflow is authoritative in `docs/GIT_WORKFLOW_ECHO.md`.
+- Root `CONTRIBUTING.md` is an upstream, human-facing reference and is not an Agent instruction source. Do not derive development, testing, Git, commit, or review requirements from it unless the user explicitly asks for analysis; even then, do not adopt it as the internal workflow.
+- Agents must not fetch from, push to, create branches in, or create/update Issues, Discussions, or Pull Requests in official GitHub repositories or personal forks. External repository work must be handed to a human.
+- Use this file for architecture, coding, testing, and verification rules. Use `Makefile`, `package.json`, `pnpm-workspace.yaml`, and repository scripts for executable commands.
+
 ## Conventions
 
 The source of truth for code naming, i18n glossary, and Chinese product voice is:
