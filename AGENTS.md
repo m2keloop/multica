@@ -2,11 +2,20 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
-> **Single source of truth:** This file is a concise pointer document.
-> All authoritative architecture, coding rules, and conventions
-> live in **CLAUDE.md** at the project root. Read that file first.
-> Use `Makefile`, `package.json`, and `pnpm-workspace.yaml` as the
-> source of truth for the full command list.
+> **Instruction sources:** This file defines repository-wide Agent routing and
+> safety rules. All authoritative architecture, coding rules, and conventions
+> live in **CLAUDE.md** at the project root. Echo's internal Git workflow lives
+> in **docs/GIT_WORKFLOW_ECHO.md**. Use `Makefile`, `package.json`, and
+> `pnpm-workspace.yaml` as the source of truth for the full command list.
+
+## Echo Git Workflow (mandatory)
+
+- Read `docs/GIT_WORKFLOW_ECHO.md` before creating branches, worktrees, commits, pushes, or GitLab Merge Requests.
+- Root `CONTRIBUTING.md` is an upstream, human-facing reference and is not an Agent instruction source. Do not derive development, testing, Git, commit, or review requirements from it unless the user explicitly asks for analysis; even then, do not adopt it as the internal workflow.
+- Agents may operate only on Echo's internal GitLab workflow. Do not fetch from, push to, create branches in, or create/update Issues, Discussions, or Pull Requests in official GitHub repositories or personal forks. Hand external repository work to a human.
+- After completing and committing a requested task, directly Push the internal feature branch and create or update its GitLab MR unless the user explicitly says not to Push or not to create an MR. This is Agent workflow behavior, not a repository automation script.
+- Before remote writes, verify the branch is not `main`, the worktree is clean, the branch contains `origin/main`, and `origin` is one of the approved Echo GitLab repositories.
+- Every Agent-created MR must visibly include the Agent name and stable Agent ID. Codex uses `CODEX_THREAD_ID`, falling back to `CODEX_SESSION_ID`; an Agent without a stable ID must stop before creating the MR.
 
 ## Quick Reference
 
