@@ -150,21 +150,29 @@ git config user.email "your.name@echo.tech"
 
 ## 6. GitLab MR 流程
 
-完成开发和验证后 Push 当前分支：
+Agent 完成开发、验证和 Commit 后，默认运行统一脚本自动 Push 当前分支，并创建或更新指向 `main` 的 GitLab MR：
 
 ```bash
-git push -u origin HEAD
+scripts/submit-agent-mr.sh \
+  --title "<mr-title>" \
+  --summary "<business-background-and-implementation>" \
+  --verification "<commands-and-results>" \
+  --risk "<risk-and-rollback>"
 ```
 
-任何 Push、创建 MR 或其他远端写操作都必须已经由用户明确要求或授权。
+除非用户明确要求“不要 Push”或“不要创建 MR”，Agent 应在任务完成后自动执行该脚本，不再为标准内部 Push/MR 流程重复请求确认。脚本只允许 Echo GitLab 的 `toolkit/multica` 和 `toolkit/multica-cli`，拒绝 `main`、脏工作区、缺少 `origin/main` 基线或任何其他 remote。
 
-GitLab MR 的目标分支为 `main`，至少说明：
+脚本会创建新 MR，或更新同一源分支已有的 MR。MR 描述强制包含：
 
-1. 业务背景和需要解决的问题。
-2. 核心实现和影响范围。
-3. 实际执行的验证命令及结果。
-4. 未执行的检查及原因。
-5. 已知风险和回滚或恢复方式；不适用时明确写明。
+1. 业务背景、核心实现和影响范围。
+2. 实际执行的验证命令及结果。
+3. 未执行的检查及原因。
+4. 已知风险和回滚或恢复方式；不适用时明确写明。
+5. Agent 名称、Agent ID、源分支和 HEAD Commit。
+
+Codex 默认使用 `CODEX_THREAD_ID`（无值时使用 `CODEX_SESSION_ID`）作为 Agent ID，Agent 名称为 `Codex`。其他 Agent 必须设置 `ECHO_AGENT_NAME` 和 `ECHO_AGENT_ID`，或通过 `--agent-name`、`--agent-id` 传入自身标识。缺少 Agent 标识时脚本拒绝提交 MR。
+
+使用 `--dry-run` 可以只验证规则并预览 MR 描述，不执行 Fetch、Push 或 GitLab API 写操作。
 
 所有评审意见都应被处理或明确回复。MR 合并后再删除远端功能分支和本地 worktree。
 
@@ -229,5 +237,6 @@ Agent 的开发权限只覆盖 Echo 内部仓库和 GitLab 流程。Agent 不得
 - [ ] Commit 原子化，邮箱符合 `@echo.tech` 规则。
 - [ ] 已执行仓库规则要求的检查，并如实记录结果。
 - [ ] 不包含密钥、内部凭据、生产数据或其他敏感信息。
-- [ ] 远端写操作只指向 Echo GitLab `origin`，且已获用户明确授权。
+- [ ] 已通过 `scripts/submit-agent-mr.sh` 自动 Push 并创建或更新内部 MR，或者用户明确要求跳过。
+- [ ] MR 描述包含 Agent 名称和 Agent ID。
 - [ ] Agent 未执行任何官方仓库或个人 Fork 操作。
