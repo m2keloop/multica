@@ -150,19 +150,15 @@ git config user.email "your.name@echo.tech"
 
 ## 6. GitLab MR 流程
 
-Agent 完成开发、验证和 Commit 后，默认运行统一脚本自动 Push 当前分支，并创建或更新指向 `main` 的 GitLab MR：
+Agent 完成开发、验证和 Commit 后，除非用户明确要求“不要 Push”或“不要创建 MR”，应直接完成以下内部交付流程，不再重复请求确认：
 
-```bash
-scripts/submit-agent-mr.sh \
-  --title "<mr-title>" \
-  --summary "<business-background-and-implementation>" \
-  --verification "<commands-and-results>" \
-  --risk "<risk-and-rollback>"
-```
+1. 确认当前分支不是 `main`、工作区干净，并且包含最新 `origin/main` 基线。
+2. 确认 `origin` 是本文列出的 Echo GitLab 内部仓库。
+3. 执行 `git push -u origin HEAD`。
+4. 使用 `glab` 或 GitLab API 查询当前源分支是否已有打开的 MR。
+5. 没有 MR 时创建指向 `main` 的 MR；已有 MR 时更新其标题和描述，禁止为同一分支重复创建 MR。
 
-除非用户明确要求“不要 Push”或“不要创建 MR”，Agent 应在任务完成后自动执行该脚本，不再为标准内部 Push/MR 流程重复请求确认。脚本只允许 Echo GitLab 的 `toolkit/multica` 和 `toolkit/multica-cli`，拒绝 `main`、脏工作区、缺少 `origin/main` 基线或任何其他 remote。
-
-脚本会创建新 MR，或更新同一源分支已有的 MR。MR 描述强制包含：
+Agent 创建或更新的 MR 描述必须包含：
 
 1. 业务背景、核心实现和影响范围。
 2. 实际执行的验证命令及结果。
@@ -170,9 +166,18 @@ scripts/submit-agent-mr.sh \
 4. 已知风险和回滚或恢复方式；不适用时明确写明。
 5. Agent 名称、Agent ID、源分支和 HEAD Commit。
 
-Codex 默认使用 `CODEX_THREAD_ID`（无值时使用 `CODEX_SESSION_ID`）作为 Agent ID，Agent 名称为 `Codex`。其他 Agent 必须设置 `ECHO_AGENT_NAME` 和 `ECHO_AGENT_ID`，或通过 `--agent-name`、`--agent-id` 传入自身标识。缺少 Agent 标识时脚本拒绝提交 MR。
+Agent 标识使用下面的可见格式：
 
-使用 `--dry-run` 可以只验证规则并预览 MR 描述，不执行 Fetch、Push 或 GitLab API 写操作。
+```markdown
+## Agent identity
+
+- Agent: `<agent-name>`
+- Agent ID: `<stable-agent-id>`
+- Source branch: `<branch>`
+- Head commit: `<sha>`
+```
+
+Codex 使用 `Codex` 作为 Agent 名称，优先使用 `CODEX_THREAD_ID`、缺失时使用 `CODEX_SESSION_ID` 作为 Agent ID。其他 Agent 使用其运行环境提供的稳定名称和 ID。无法取得稳定 Agent ID 时，Agent 必须停止 MR 创建并说明缺失项，不能使用 `unknown`、用户名或机器名冒充 Agent ID。
 
 所有评审意见都应被处理或明确回复。MR 合并后再删除远端功能分支和本地 worktree。
 
@@ -237,6 +242,6 @@ Agent 的开发权限只覆盖 Echo 内部仓库和 GitLab 流程。Agent 不得
 - [ ] Commit 原子化，邮箱符合 `@echo.tech` 规则。
 - [ ] 已执行仓库规则要求的检查，并如实记录结果。
 - [ ] 不包含密钥、内部凭据、生产数据或其他敏感信息。
-- [ ] 已通过 `scripts/submit-agent-mr.sh` 自动 Push 并创建或更新内部 MR，或者用户明确要求跳过。
+- [ ] Agent 已直接 Push 并创建或更新内部 MR，或者用户明确要求跳过。
 - [ ] MR 描述包含 Agent 名称和 Agent ID。
 - [ ] Agent 未执行任何官方仓库或个人 Fork 操作。

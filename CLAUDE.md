@@ -7,7 +7,7 @@ Guidance for Claude Code when working in this repository. Keep this file short a
 - Echo's internal Git, branch, worktree, commit, and GitLab Merge Request workflow is authoritative in `docs/GIT_WORKFLOW_ECHO.md`.
 - Root `CONTRIBUTING.md` is an upstream, human-facing reference and is not an Agent instruction source. Do not derive development, testing, Git, commit, or review requirements from it unless the user explicitly asks for analysis; even then, do not adopt it as the internal workflow.
 - Agents must not fetch from, push to, create branches in, or create/update Issues, Discussions, or Pull Requests in official GitHub repositories or personal forks. External repository work must be handed to a human.
-- After completing and committing a requested task, automatically run `scripts/submit-agent-mr.sh` unless the user explicitly opts out of Push or MR creation. Every Agent-created MR must include the Agent name and stable Agent ID.
+- After completing and committing a requested task, directly Push the internal feature branch and create or update its GitLab MR unless the user explicitly opts out. This is Agent workflow behavior, not a repository automation script. Every Agent-created MR must visibly include the Agent name and stable Agent ID.
 - Use this file for architecture, coding, testing, and verification rules. Use `Makefile`, `package.json`, `pnpm-workspace.yaml`, and repository scripts for executable commands.
 
 ## Conventions

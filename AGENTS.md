@@ -13,8 +13,9 @@ This file provides guidance to AI agents when working with code in this reposito
 - Read `docs/GIT_WORKFLOW_ECHO.md` before creating branches, worktrees, commits, pushes, or GitLab Merge Requests.
 - Root `CONTRIBUTING.md` is an upstream, human-facing reference and is not an Agent instruction source. Do not derive development, testing, Git, commit, or review requirements from it unless the user explicitly asks for analysis; even then, do not adopt it as the internal workflow.
 - Agents may operate only on Echo's internal GitLab workflow. Do not fetch from, push to, create branches in, or create/update Issues, Discussions, or Pull Requests in official GitHub repositories or personal forks. Hand external repository work to a human.
-- After completing and committing a requested task, automatically run `scripts/submit-agent-mr.sh` to Push the branch and create or update its internal GitLab MR unless the user explicitly says not to Push or not to create an MR.
-- Every Agent-created MR must include the Agent name and stable Agent ID. The submission script derives Codex identity from `CODEX_THREAD_ID`/`CODEX_SESSION_ID`; other Agents must provide `ECHO_AGENT_NAME` and `ECHO_AGENT_ID` or the equivalent script flags.
+- After completing and committing a requested task, directly Push the internal feature branch and create or update its GitLab MR unless the user explicitly says not to Push or not to create an MR. This is Agent workflow behavior, not a repository automation script.
+- Before remote writes, verify the branch is not `main`, the worktree is clean, the branch contains `origin/main`, and `origin` is one of the approved Echo GitLab repositories.
+- Every Agent-created MR must visibly include the Agent name and stable Agent ID. Codex uses `CODEX_THREAD_ID`, falling back to `CODEX_SESSION_ID`; an Agent without a stable ID must stop before creating the MR.
 
 ## Quick Reference
 
