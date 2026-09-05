@@ -52,7 +52,7 @@ type noopReplier struct {
 
 func (n *noopReplier) Reply(ctx context.Context, inst Installation, msg InboundMessage, res DispatchResult) {
 	switch res.Outcome {
-	case OutcomeNeedsBinding, OutcomeAgentOffline, OutcomeAgentArchived, OutcomeFreshPending, OutcomeChatStarted, OutcomeIssueUsage, OutcomeIssueConfirmation:
+	case OutcomeNeedsBinding, OutcomeAgentOffline, OutcomeAgentArchived, OutcomeFreshPending, OutcomeChatStarted, OutcomeIssueUsage:
 		n.log.Warn("lark outcome replier: outbound reply skipped (replier not wired)",
 			"outcome", string(res.Outcome),
 			"installation_id", uuidString(inst.ID),
@@ -190,15 +190,6 @@ func (r *LarkOutcomeReplier) Reply(ctx context.Context, inst Installation, msg I
 	case OutcomeChatStarted:
 		if err := r.sendChatNotice(ctx, inst, msg, chatStartedCopy); err != nil {
 			r.log.Warn("lark outcome replier: new-chat confirmation failed", "installation_id", uuidString(inst.ID), "chat_id", string(msg.ChatID), "err", err.Error())
-		}
-	case OutcomeIssueConfirmation:
-		copy := issueConfirmationCopy(res.IssueTitle)
-		if err := r.sendChatNotice(ctx, inst, msg, copy); err != nil {
-			r.log.Warn("lark outcome replier: issue confirmation reply failed",
-				"installation_id", uuidString(inst.ID),
-				"chat_id", string(msg.ChatID),
-				"err", err.Error(),
-			)
 		}
 	case OutcomeIssueUsage:
 		copy := issueUsageCopy
@@ -339,14 +330,6 @@ func issueCreatedText(res DispatchResult, appURL string) string {
 		return line
 	}
 	return line + "\n" + strings.TrimRight(appURL, "/") + "/issues/" + identifier
-}
-
-func issueConfirmationCopy(title string) string {
-	title = strings.TrimSpace(title)
-	if title == "" {
-		return "我已识别到一个任务草稿。回复「确认」创建，或回复「取消」放弃。"
-	}
-	return fmt.Sprintf("我准备创建任务：%s\n回复「确认」创建，或回复「取消」放弃。", title)
 }
 
 func issueDuplicateText(res DispatchResult, appURL string) string {
